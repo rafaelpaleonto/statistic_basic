@@ -1,0 +1,58 @@
+import psycopg2
+import pandas as pd
+import math as m
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+connection = psycopg2.connect(database="TEST",
+                             user="postgres",
+                              password="2020",
+                              host="localhost",
+                              port=5432)
+
+cursor = connection.cursor()
+
+con1 = connection.cursor()
+con1.execute("""
+    SELECT * FROM DADOS;
+""")
+
+query1 = con1.fetchall()
+con1.close()
+d1 = []
+for i in query1:
+    id = int(i[0])
+    diametro = float(i[1])
+    d1.append([id,diametro])
+
+dados = pd.DataFrame(d1, columns=['ID', 'DIAMETRO'])
+# quantidade de intervalos
+
+I = m.floor(m.log2(len(dados) / m.log10(len(dados))))
+
+min_value = dados['DIAMETRO'].min()
+max_value = dados['DIAMETRO'].max()
+
+class_amp = int(m.ceil((max_value - min_value) / I))
+# O demônio de um histograma 
+diametro_table_frequency = pd.DataFrame(columns=['Classes','Frequencia'], index=range(class_amp))
+print(len(diametro_table_frequency))
+data_histogram = []
+
+for i in range(class_amp):
+    lower = min_value + i*I
+    upper = min_value + (i + 1) * I
+    freq = dados[(dados['DIAMETRO'] >= lower) * (dados['DIAMETRO'] < upper)].shape[0]
+    diametro_table_frequency.loc[i] = [f'[{lower}, {upper})', freq]
+    data_histogram.extend([lower + (upper- lower) / 2] * freq)
+
+
+sns.histplot(data_histogram, bins=len(diametro_table_frequency), kde=True, color='lightgreen', edgecolor='red')
+plt.xlabel('CLASSES')
+plt.ylabel('FREQUENCIA')
+plt.title('HISTOGRAMA')
+#plt.show()
+
+fig = plt.figure(figsize=(10, 7))
+plt.boxplot(dados['DIAMETRO'])
+#plt.show()
