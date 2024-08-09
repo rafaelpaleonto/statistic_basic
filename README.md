@@ -1,2 +1,2 @@
 # statistic_basic
-geral de estatística básica
+Códigos para criação das informações de estatística básica
