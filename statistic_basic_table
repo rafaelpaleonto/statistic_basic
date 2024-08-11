@@ -5,10 +5,10 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 connection = psycopg2.connect(database="TEST",
-                             user="postgres",
-                              password="2020",
+                             user="puser",
+                              password="pass",
                               host="localhost",
-                              port=5432)
+                              port='number_port')
 
 cursor = connection.cursor()
 
