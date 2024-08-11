@@ -38,16 +38,23 @@ class_amp = int(m.ceil((max_value - min_value) / I))
 diametro_table_frequency = pd.DataFrame(columns=['Classes','Frequencia'], index=range(class_amp))
 print(len(diametro_table_frequency))
 data_histogram = []
-
+fa = 0
+far = 0
 for i in range(class_amp):
-    lower = min_value + i*I
+    lower = min_value + i * I
     upper = min_value + (i + 1) * I
-    freq = dados[(dados['DIAMETRO'] >= lower) * (dados['DIAMETRO'] < upper)].shape[0]
-    diametro_table_frequency.loc[i] = [f'[{lower}, {upper})', freq]
-    data_histogram.extend([lower + (upper- lower) / 2] * freq)
+    freq = dados[(dados['DIAMETRO'] >= lower) & (dados['DIAMETRO'] < upper)].shape[0]
+    freq_re = round(freq / total, 4)
+    freq_re_p = round(freq_re * 100, 2)
+    fa += freq
+    far = round((fa/total)*100,2)
+    diametro_table_frequency.loc[i] = [f'[{lower}, {upper})', freq, freq_re, freq_re_p, fa,far]
+    
+
+    data_histogram.extend([lower + (upper - lower) / 2] * freq))
 
 
-sns.histplot(data_histogram, bins=len(diametro_table_frequency), kde=True, color='lightgreen', edgecolor='red')
+sns.histplot(data_histogram, bins=len(diametro_table_frequency), color='lightgreen', edgecolor='red')
 plt.xlabel('CLASSES')
 plt.ylabel('FREQUENCIA')
 plt.title('HISTOGRAMA')
