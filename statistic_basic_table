@@ -9,7 +9,6 @@ connection = psycopg2.connect(database="TEST",
                               password="pass",
                               host="localhost",
                               port='number_port')
-
 cursor = connection.cursor()
 
 con1 = connection.cursor()
@@ -28,7 +27,7 @@ for i in query1:
 dados = pd.DataFrame(d1, columns=['ID', 'DIAMETRO'])
 # quantidade de intervalos
 
-I = m.floor(m.log2(len(dados)) + 2)
+I = m.ceil(m.log2(len(dados)) + 2)
 
 min_value = dados['DIAMETRO'].min()
 max_value = dados['DIAMETRO'].max()
@@ -56,12 +55,43 @@ for i in range(class_amp):
 
     data_histogram.extend([lower + (upper - lower) / 2] * freq)
 
-print(diametro_table_frequency)
+#print(diametro_table_frequency)
+
 sns.histplot(data_histogram, bins=len(diametro_table_frequency), color='lightgreen', edgecolor='red')
 plt.xlabel('CLASSES')
-plt.ylabel('FREQUENCIA')
-plt.title('HISTOGRAMA')
+plt.ylabel('Frequencia de observações')
+plt.title('Histograma com diâmetro dos microfósseis coloniais')
+for p in plt.gca().patches:
+    height = p.get_height()
+    plt.text(p.get_x() + p.get_width() / 2., height + 0.1,
+             f'{int(height)}', ha="center", fontsize=10)
 #plt.show()
+
+dados_mediana = dados['DIAMETRO'].sort_values( ascending=True).reset_index(drop=True)
+mediana = dados_mediana.median()
+media = round(dados_mediana.mean(),4)
+
+media_ceil = m.ceil(media)
+media_floor = m.floor(media)
+varianca = round(np.var(dados_mediana),4)
+std = round(np.std(dados_mediana), 4)
+coef_variacao = round( np.std(dados_mediana) / np.mean(dados_mediana)*100,4)
+print(f"Mediana: {mediana}")
+print(f"Média: {media}")
+print(f"Média arredondada para cima: {media_ceil}")
+print(f"Média arredondada para baixo: {media_floor}")
+print(f"Variância: {varianca}")
+print(f"Desvio Padrao: {std}")
+print(f"Coefieciente de variacao: {coef_variacao}")
+
+
+# Criando o gráfico de caixa
+fig = plt.figure(figsize=(12, 6))
+plt.boxplot(dados['DIAMETRO'], notch=True, sym='+')
+plt.xticks([1], ['DIAMETRO'])
+plt.ylim(dados['DIAMETRO'].min() - 1, dados['DIAMETRO'].max() + 1)
+plt.grid(True, color='gray', linestyle='--', linewidth=0.7)
+plt.show()
 
 fig = plt.figure(figsize=(10, 7))
 plt.boxplot(dados['DIAMETRO'])
