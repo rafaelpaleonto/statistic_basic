@@ -1,5 +1,6 @@
 USE DATABASE_DADOS;
-
+-- Profundidade -> m
+-- Medidas -> micrômetros (µm)
 CREATE TABLE DADOS_PROFUNDIDADE(
 	ID SERIAL PRIMARY KEY,
 	PROFUNDIDADE DECIMAL(10,2),
