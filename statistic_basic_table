@@ -32,34 +32,27 @@ I = m.ceil(m.log2(len(dados)) + 2)
 min_value = dados['DIAMETRO'].min()
 max_value = dados['DIAMETRO'].max()
 
-class_amp = int(m.ceil((max_value - min_value) / I))
-# O demônio de um histograma 
-diametro_table_frequency = pd.DataFrame(columns=['Classes','Frequencia','frequencia relativa',
-                                                'frequencia relatiav percentual', 'frequencia acumulada',
-                                                'frequencia acumulada percentual'], index=range(class_amp))
-print(len(diametro_table_frequency))
-data_histogram = []
+class_amp = ((max_value - min_value) / I)
+
+tabela_freq = pd.DataFrame(columns=['ID', 'classes', 'freq_simples', 'freq_perct', 'freq_ac', 'freq_acp'])
+dados_histgram = []
+total = dados1['diametro'].count()
 fa = 0
-far = 0
-total = dados['DIAMETRO'].count()
-for i in range(class_amp):
-    lower = min_value + i * I
-    upper = min_value + (i + 1) * I
-    freq = dados[(dados['DIAMETRO'] >= lower) & (dados['DIAMETRO'] < upper)].shape[0]
-    freq_re = round(freq / total, 4)
-    freq_re_p = round(freq_re * 100, 2)
-    fa += freq
-    far = round((fa/total)*100,2)
-    diametro_table_frequency.loc[i] = [f'[{lower}, {upper})', freq, freq_re, freq_re_p, fa,far]
-    
+fap = 0
+for i in range(I):
+    lower = min_value + i * class_amp
+    upper = lower + class_amp
+    freq_data = dados1[(dados1['diametro'] >= lower) & (dados1['diametro'] < upper)]
+    freq_count = freq_data['diametro'].count()
+    fp = freq_count / total 
+    fa += freq_count
+    fap = fa/total
+    tabela_freq.loc[i] = [i + 1, f'[{lower:.2f}, {upper:.2f})', freq_count, fp, fa, fap]
+    dados_histgram.extend([lower + (upper - lower) / 2] * freq_count)
 
-    data_histogram.extend([lower + (upper - lower) / 2] * freq)
-
-#print(diametro_table_frequency)
-
-sns.histplot(data_histogram, bins=len(diametro_table_frequency), color='lightgreen', edgecolor='red')
-plt.xlabel('CLASSES')
-plt.ylabel('Frequencia de observações')
+sns.histplot(dados_histgram, bins=len(tabela_freq), palette='viridis', edgecolor='red')
+plt.xlabel('Classes')
+plt.ylabel('Histograma')
 plt.title('Histograma com diâmetro dos microfósseis coloniais')
 for p in plt.gca().patches:
     height = p.get_height()
