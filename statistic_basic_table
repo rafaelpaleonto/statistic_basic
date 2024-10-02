@@ -5,8 +5,6 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-#Profundidade -> m
-#Medidas -> micrômetros (µm)
 
 connection = psycopg2.connect(database="TEST",
                              user="puser",
