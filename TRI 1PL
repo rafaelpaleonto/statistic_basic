@@ -2,68 +2,61 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 
-resposta = 'EBBCDBDAECDBBBECDEBEABBDABDBBCCECDDABCAEBDADD'
+respostas = 'EBBCDBDAECDBBBECDEBEABBDABDBBCCECDDABCAEBDADD'
 gabarito = 'CEDAEEDEECCEBADCCCABBABCAACDDDACDBEABDCDBEABD'
 
-
-responses = []
-for i in range(1,len(resposta)):
-    if resposta[i]  == gabarito[i]:
-        responses.append(1)
+acertos = []
+for i in range(1, len(respostas)):
+    if respostas[i] == gabarito[i]:
+        acertos.append(1)
     else:
-        responses.append(0)
+        acertos.append(0)
+acertos = np.array(acertos).reshape(1, -1)
 
-responses = np.array(responses).reshape(1, -1)
-
-def log_likelihood(b, responses):
-    
-    n_persons, n_items = responses.shape
-    
-    
+def log_verossimilhanca(b, acertos):
+  
+    n_pessoas, n_itens = acertos.shape
+       
     theta = np.linspace(-3, 3, 100)
-    
-    
-    probabilities = 1 / (1 + np.exp(-(theta[:, None] - b)))  
 
+    probabilidades = 1 / (1 + np.exp(-(theta[:, None] - b)))  
 
-    likelihoods = np.zeros((n_persons, len(theta)))  
-    for i in range(n_persons):
+    verossimilhancas = np.zeros((n_pessoas, len(theta)))  
+    for i in range(n_pessoas):
         
-        p = probabilities[:, responses[i] == 1]  
-        q = probabilities[:, responses[i] == 0] 
-        likelihoods[i] = np.prod(p, axis=1) * np.prod(1 - q, axis=1)
+        p = probabilidades[:, acertos[i] == 1]  
+        q = probabilidades[:, acertos[i] == 0] 
+        verossimilhancas[i] = np.prod(p, axis=1) * np.prod(1 - q, axis=1)
 
-    # Log-verossimilhança total
-    log_likelihoods = np.sum(np.log(likelihoods + 1e-10)) 
-    return -log_likelihoods 
+    log_verossimilhancas = np.sum(np.log(verossimilhancas + 1e-10)) 
+    return -log_verossimilhancas 
 
 
-n_items = responses.shape[1]
-initial_b = np.zeros(n_items)
+n_itens = acertos.shape[1]
+b_inicial = np.zeros(n_itens)
 
 # Otimização
-result = minimize(log_likelihood, initial_b, args=(responses,), method='Nelder-Mead')
-estimated_b = result.x
+resultado = minimize(log_verossimilhanca, b_inicial, args=(acertos,), method='Nelder-Mead')
+b_estimado = resultado.x
 
 print("Parâmetros de dificuldade estimados (b):")
-for i, b_value in enumerate(estimated_b):
-    print(f"Item {i+1}: {b_value:.4f}")
+for i, valor_b in enumerate(b_estimado):
+    print(f"Item {i+1}: {valor_b:.4f}")
 
 
-def log_likelihood_theta(theta, b, responses):
-    # Modelo Rasch para a probabilidade de acerto de um candidato com habilidade theta
-    probabilities = 1 / (1 + np.exp(-(theta - b)))
+def log_verossimilhanca_theta(theta, b, acertos):
+    probabilidades = 1 / (1 + np.exp(-(theta - b)))
     
-    p = probabilities[responses == 1]  # Probabilidade de acerto
-    q = probabilities[responses == 0]  # Probabilidade de erro
-    likelihood = np.prod(p) * np.prod(1 - q)  # Verossimilhança total
+    p = probabilidades[acertos == 1]  
+    q = probabilidades[acertos == 0]  
+    verossimilhanca = np.prod(p) * np.prod(1 - q)  
 
-    log_likelihood_value = np.log(likelihood + 1e-10)  
-    return -log_likelihood_value  
+    valor_log_verossimilhanca = np.log(verossimilhanca + 1e-10)  
+    return -valor_log_verossimilhanca  
 
 
-initial_theta = 0  
-result_theta = minimize(log_likelihood_theta, initial_theta, args=(estimated_b, responses[0]), method='Nelder-Mead')
-estimated_theta = result_theta.x[0]
+theta_inicial = 0  
+resultado_theta = minimize(log_verossimilhanca_theta, theta_inicial, args=(b_estimado, acertos[0]), method='Nelder-Mead')
+theta_estimado = resultado_theta.x[0]
 
-print(f"\nHabilidade estimada do candidato (theta): {estimated_theta:.4f}")
+print(f"\nHabilidade estimada do candidato (theta): {theta_estimado:.4f}")
