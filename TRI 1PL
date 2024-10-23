@@ -1,0 +1,69 @@
+import numpy as np
+import pandas as pd
+from scipy.optimize import minimize
+
+resposta = 'EBBCDBDAECDBBBECDEBEABBDABDBBCCECDDABCAEBDADD'
+gabarito = 'CEDAEEDEECCEBADCCCABBABCAACDDDACDBEABDCDBEABD'
+
+
+responses = []
+for i in range(1,len(resposta)):
+    if resposta[i]  == gabarito[i]:
+        responses.append(1)
+    else:
+        responses.append(0)
+
+responses = np.array(responses).reshape(1, -1)
+
+def log_likelihood(b, responses):
+    
+    n_persons, n_items = responses.shape
+    
+    
+    theta = np.linspace(-3, 3, 100)
+    
+    
+    probabilities = 1 / (1 + np.exp(-(theta[:, None] - b)))  
+
+
+    likelihoods = np.zeros((n_persons, len(theta)))  
+    for i in range(n_persons):
+        
+        p = probabilities[:, responses[i] == 1]  
+        q = probabilities[:, responses[i] == 0] 
+        likelihoods[i] = np.prod(p, axis=1) * np.prod(1 - q, axis=1)
+
+    # Log-verossimilhança total
+    log_likelihoods = np.sum(np.log(likelihoods + 1e-10)) 
+    return -log_likelihoods 
+
+
+n_items = responses.shape[1]
+initial_b = np.zeros(n_items)
+
+# Otimização
+result = minimize(log_likelihood, initial_b, args=(responses,), method='Nelder-Mead')
+estimated_b = result.x
+
+print("Parâmetros de dificuldade estimados (b):")
+for i, b_value in enumerate(estimated_b):
+    print(f"Item {i+1}: {b_value:.4f}")
+
+
+def log_likelihood_theta(theta, b, responses):
+    # Modelo Rasch para a probabilidade de acerto de um candidato com habilidade theta
+    probabilities = 1 / (1 + np.exp(-(theta - b)))
+    
+    p = probabilities[responses == 1]  # Probabilidade de acerto
+    q = probabilities[responses == 0]  # Probabilidade de erro
+    likelihood = np.prod(p) * np.prod(1 - q)  # Verossimilhança total
+
+    log_likelihood_value = np.log(likelihood + 1e-10)  
+    return -log_likelihood_value  
+
+
+initial_theta = 0  
+result_theta = minimize(log_likelihood_theta, initial_theta, args=(estimated_b, responses[0]), method='Nelder-Mead')
+estimated_theta = result_theta.x[0]
+
+print(f"\nHabilidade estimada do candidato (theta): {estimated_theta:.4f}")
