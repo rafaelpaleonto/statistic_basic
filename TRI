@@ -1,0 +1,46 @@
+theta <- seq(-3,3,1)
+bmedium <- 0
+amoderate <- 1
+
+P <- 1 / (1 +exp(-amoderate*(theta - bmedium)))
+
+plot(theta, P, type = "l")
+par(lab=c(7,3,3))
+
+theta <- seq(-3,3, .1)
+
+b <- 0
+a <- 1
+
+P <- 1 / (1 + exp(-a*(theta - b)))
+
+plot(theta, P, type = "l", xlim = c(-3, 3), ylim = c(0, 1),
+     xlab = expression(paste("Habilidade ", theta)),
+     ylab = expression(paste("Probabilidade de uma resposta correta, P(", theta, ")")))
+
+icc <- function(b,a){
+  par(lab = c(7,3,3))
+  theta <- seq(-3,3,.1)
+  P <- 1 / (1+exp(-a*(theta - b)))
+  plot(theta, P, type="l", xlim = c(-3,3), ylim = c(0,1),
+       xlab="Habilidade", ylab = "Probabilidade de responder corretamente um item")
+}
+b1 <- -2.625
+b2 <- -1.5
+b3 <- 0
+b4 <- 1.5
+b5 <- 2.625
+
+a1 <- 0
+a2 <- 0.4
+a3 <- 1
+a4 <- 2.1
+a5 <- 999
+
+
+icc(b3,a3)
+par(new=TRUE)
+icc(b2,a2)
+par(new=TRUE)
+icc(b4,a4)
+
